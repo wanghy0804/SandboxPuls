@@ -1,5 +1,7 @@
 # SandboxPulse
 
+![9f29a18e-c27e-49a8-87d4-5a4e30e1e412](./README.assets/9f29a18e-c27e-49a8-87d4-5a4e30e1e412.png)
+
 把 Claude Code / OpenAI Codex 会话的回合结果实时推送到微信(经 Hermes
 网关):agent 跑完一个回合,手机上就能看到它说了什么、配额还剩多少,
 不用守在终端前。
