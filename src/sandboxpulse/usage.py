@@ -14,6 +14,7 @@ import json
 import time
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 from sandboxpulse.models import Signal, is_terminal
 
@@ -46,7 +47,7 @@ def _read_token(path: Path) -> str | None:
     return token if isinstance(token, str) and token else None
 
 
-def _fetch_payload(token: str) -> dict:
+def _fetch_payload(token: str) -> dict[str, Any]:
     request = urllib.request.Request(
         _USAGE_URL,
         headers={

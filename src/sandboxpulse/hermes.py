@@ -14,7 +14,7 @@ import logging
 import time
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 from sandboxpulse.models import AgentState, Signal, is_terminal
 
@@ -89,7 +89,7 @@ def _countdown(raw: object, now: datetime) -> str | None:
     return f"{minutes}m"
 
 
-def _usage_line(metadata: dict, now: datetime) -> str | None:
+def _usage_line(metadata: dict[str, Any], now: datetime) -> str | None:
     """Quota footer with usage bars for the 5h and weekly rate windows, e.g.
 
     `Usage █░░░░░░░░░ 6% (resets in 4h 41m) | Weekly ██░░░░░░░░ 16% (...)`
