@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import re
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -47,6 +48,15 @@ def _supersedes(new: Signal, queued: Signal) -> bool:
 
 # IM messages should stay readable; replies beyond this are cut.
 _REPLY_MAX_CHARS = 2000
+
+_LOCAL_MARKDOWN_LINK_RE = re.compile(
+    r"\[([^\]\n]+)\]\(((?:~/|/|[A-Za-z]:[/\\])[^)\n]+)\)"
+)
+_LOCAL_FILE_PATH_RE = re.compile(
+    r"(?<![/:\w.])(?:~/|/|[A-Za-z]:[/\\])"
+    r"(?:[\w.\-]+[/\\])*[\w.\-]+\.[A-Za-z0-9]+(?::\d+)?"
+)
+_CODE_SPAN_RE = re.compile(r"(```[^\n]*\n.*?```|`[^`\n]+`)", re.DOTALL)
 
 
 _BAR_SLOTS = 10
@@ -118,6 +128,17 @@ def _reply_text(signal: Signal) -> str | None:
         return None
     if len(text) > _REPLY_MAX_CHARS:
         text = text[:_REPLY_MAX_CHARS].rstrip() + " …"
+    # Hermes auto-uploads existing local paths found in message text. Codex
+    # commonly emits clickable local file links, but SandboxPulse notifications
+    # are text-only, so keep the label and protect any remaining bare paths.
+    text = _LOCAL_MARKDOWN_LINK_RE.sub(r"\1", text)
+    parts = _CODE_SPAN_RE.split(text)
+    text = "".join(
+        part
+        if index % 2
+        else _LOCAL_FILE_PATH_RE.sub(lambda match: f"`{match.group(0)}`", part)
+        for index, part in enumerate(parts)
+    )
     return text
 
 

@@ -154,6 +154,52 @@ def test_format_message_includes_agent_reply() -> None:
     assert "Done — fixed the bug." in msg
 
 
+def test_format_message_removes_local_markdown_link_target() -> None:
+    msg = HermesEmitter.format_message(
+        _signal(
+            result="Updated [settings.json](/home/user/.codex/settings.json:51).",
+            metadata={"provider": "codex"},
+        )
+    )
+    assert "Updated settings.json." in msg
+    assert "/home/user/.codex/settings.json" not in msg
+
+
+def test_format_message_protects_bare_local_file_path() -> None:
+    msg = HermesEmitter.format_message(
+        _signal(
+            result="Backup: /home/user/project/report.txt",
+            metadata={"provider": "codex"},
+        )
+    )
+    assert "Backup: `/home/user/project/report.txt`" in msg
+
+
+def test_format_message_preserves_existing_inline_code_path() -> None:
+    msg = HermesEmitter.format_message(
+        _signal(
+            result="Backup: `/home/user/project/report.txt`",
+            metadata={"provider": "codex"},
+        )
+    )
+    assert "Backup: `/home/user/project/report.txt`" in msg
+    assert "``/home/user/project/report.txt``" not in msg
+
+
+def test_format_message_protects_path_at_truncation_boundary() -> None:
+    path = "/home/user/project/report.txt"
+    prefix = "x" * (_reply_limit := 2000 - len(path) - 1)
+    msg = HermesEmitter.format_message(
+        _signal(
+            result=f"{prefix} {path} trailing text",
+            metadata={"provider": "codex"},
+        )
+    )
+    assert _reply_limit > 0
+    assert f"`{path}`" in msg
+    assert msg.endswith("…")
+
+
 def test_format_message_ignores_non_string_result() -> None:
     msg = HermesEmitter.format_message(_signal(result={"exit_code": 0}))
     assert "exit_code" not in msg
