@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# 个人/敏感配置(模板见 .env.example)
+.env
+
+# 运行时产物
+/signals
+
+# AI 工具本地文件(代码索引、会话配置、代理指令)
+.gitnexus/
+.claude/
+.codex/
+CLAUDE.md
+AGENTS.md
+.cursor/
+.cursorrules
+.aider*
+.windsurf/
+GEMINI.md
